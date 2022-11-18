@@ -1,6 +1,7 @@
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+const queryClient = new QueryClient()
 
 export default function Home() {
   return (
@@ -12,21 +13,31 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        Plus cash demo | AWS Amplify
+        <QueryClientProvider client={queryClient}>
+          <h1>Using React Query below</h1>
+          <Content />
+        </QueryClientProvider>
       </main>
+    </div>
+  )
+}
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+function Content() {
+  const { isLoading, error, data } = useQuery({
+    queryKey: ['repoData'],
+    queryFn: () =>
+      fetch('/api/hello').then(res => res.json())
+  })
+  if (isLoading) return 'Loading...'
+  if (error) return 'An error has occurred: ' + error.message
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.description}</p>
+      <strong>👀 {data.subscribers_count}</strong>{' '}
+      <strong>✨ {data.stargazers_count}</strong>{' '}
+      <strong>🍴 {data.forks_count}</strong>
     </div>
   )
 }
